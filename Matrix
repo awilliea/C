@@ -1,0 +1,147 @@
+#include<iostream>
+#include"matrix.h"
+#include<stdlib.h>
+#include<stdio.h>
+
+matrix::matrix(int row1,int column1){/////設置列與行，並給予矩陣的值一儲存空間
+    row=row1;
+    column=column1;
+    MN=new double[row1*column1];
+    printf("%s\n","Input matrix:"); /////寫入值
+    for(int i=0;i<row1;i++){
+            printf("%s%d :","enter your numbers in row ",i+1);
+        for(int j=0;j<column1;j++){
+            scanf("%lf",(MN+i*column1+j));
+        }
+    }
+    //delete MN;
+}
+matrix::matrix(int row1,int column1,double* MN1){
+    row=row1;
+    column=column1;
+    MN=MN1;
+
+}
+void matrix::print_matrix(){ ///////傳出矩陣的型態，但不知為啥他都會比"寫入"先執行
+    printf("%s\n","Output matrix is:");
+    for(int i=0;i<row;i++){     ////原來是因為要把lf改成f.....
+        for(int j=0;j<column;j++){
+            printf("%0.1f\t",*(MN+i*row+j));
+        }
+        printf("\n");
+    }
+
+
+}
+
+double matrix::getvalue(int i){/////用來檢查矩陣的值是否確定寫入，證實矩陣的值是確定有傳入的
+    return *(MN+i);
+}
+
+matrix matrix::operator+(matrix &m){
+    if (m.row==row && m.column==column){
+        double* n=new double[row*m.column];
+        for(int i=0;i<row;i++){
+            for(int j=0;j<column;j++){
+                *(n+i*row+j)=(*(MN+i*row+j)+*(m.MN+i*row+j));
+            }
+    }
+    return matrix(row,column,n);
+    }
+    else{
+        printf("%s\n","The two matrix can't be plused");
+        return m ;
+    }
+
+}
+
+matrix matrix::operator-(matrix &m){
+    if (m.row==row && m.column==column){
+        double* n=new double[row*m.column];
+        for(int i=0;i<row;i++){
+            for(int j=0;j<column;j++){
+                *(n+i*row+j)=(*(MN+i*row+j)-*(m.MN+i*row+j));
+            }
+    }
+    return matrix(row,column,n);
+    return m;
+    }
+    else{
+        printf("%s\n","The two matrix can't be substracted");
+    }
+}
+
+matrix matrix::operator*(matrix &m){//////////因為有非方陣
+                                        //////所以要改成這樣
+    if ( column==m.row){
+        double* n=new double[row*m.column];////能乘之條件
+        for(int i=0;i<row;i++){           ////i j 根據new出來的位置去改就行
+            for(int j=0;j<m.column;j++){
+                float temp=0;
+                for (int k=0;k<column;k++){   /////開始計算*開後的值
+                    temp+=(*(MN+i*row+k)* *(m.MN+k*m.column+j));////////A(ik)*B(kj) 加總
+                }
+                *(n+i*row+j)=temp;
+            }
+    }
+        return matrix(row,m.column,n);
+
+    }
+    else{
+        printf("%s\n","The two matrix can't be plused");
+        return m;
+    }
+}
+
+double matrix::trace(){
+    double t;
+    if(row==column){
+            for (int i=0;i<row;i++){
+                    t+=*(MN+i*row+i);
+            }
+    }
+    return t;
+}
+
+matrix matrix::low_dimension(matrix m,int M,int N){////////用大於小於去判別是要跳過成下一行列或照舊運算
+    double*n;                             ////////總共有4種可能
+    for (int i=0;i<m.row ;i++){
+            if(i+1<M){
+                for(int j=0;j<m.column ;j++){
+                    if(j+1<N){
+                        *(n+i*row+j)=*(m.MN+i*row+j);
+                    }
+                    else if(j+1>N){
+                        *(n+i*row+j-1)=*(m.MN+i*row+j);
+                    }
+            }
+            }
+            else if(i+1>M){
+                    for(int j=0;j<m.column ;j++){
+                        if (j+1<N){
+                        *(n+(i-1)*row+j)=*(m.MN+i*row+j);
+                        }
+                        else if(j+1>N){
+                        *(n+(i-1)*row+j-1)=*(m.MN+i*row+j);
+                        }
+            }
+            }
+    }
+    return matrix(m.row-1,m.column-1,n);
+}
+
+double matrix::det(matrix m){ ///////要先寫一個降微的函式，在用遞迴
+    double d;
+
+    if (row>1){
+        for (int i=0;i<row;i++){
+            d+=det(low_dimension(m,1,i+1));
+        }
+
+    return d;
+    }
+    else{
+        return *(m.MN);
+    }
+
+}
