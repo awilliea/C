@@ -2,6 +2,7 @@
 #include"matrix.h"
 #include<stdlib.h>
 #include<stdio.h>
+#include<cmath>
 
 matrix::matrix(int row1,int column1){/////設置列與行，並給予矩陣的值一儲存空間
     row=row1;
@@ -103,45 +104,49 @@ double matrix::trace(){
     return t;
 }
 
-matrix matrix::low_dimension(matrix m,int M,int N){////////用大於小於去判別是要跳過成下一行列或照舊運算
-    double*n;                             ////////總共有4種可能
-    for (int i=0;i<m.row ;i++){
+matrix matrix::cofactor(int M,int N){////////用大於小於去判別是要跳過成下一行列或照舊運算
+    double*n=new double[(row-1)*(column-1)];     ////先給他空間
+    for (int i=0;i<row ;i++){                   ////////總共有4種可能
             if(i+1<M){
-                for(int j=0;j<m.column ;j++){
+                for(int j=0;j<column ;j++){
                     if(j+1<N){
-                        *(n+i*row+j)=*(m.MN+i*row+j);
+                        *(n+i*(row-1)+j)=*(MN+i*row+j); ////新的n指標的儲存位置跟之前已不一樣 所以要-1
                     }
                     else if(j+1>N){
-                        *(n+i*row+j-1)=*(m.MN+i*row+j);
+                        *(n+i*(row-1)+j-1)=*(MN+i*row+j);
                     }
             }
             }
             else if(i+1>M){
-                    for(int j=0;j<m.column ;j++){
+                    for(int j=0;j<column ;j++){
                         if (j+1<N){
-                        *(n+(i-1)*row+j)=*(m.MN+i*row+j);
+                        *(n+(i-1)*(row-1)+j)=*(MN+i*row+j);
                         }
                         else if(j+1>N){
-                        *(n+(i-1)*row+j-1)=*(m.MN+i*row+j);
+                        *(n+(i-1)*(row-1)+j-1)=*(MN+i*row+j);
                         }
             }
             }
     }
-    return matrix(m.row-1,m.column-1,n);
+    return matrix(row-1,column-1,n);
 }
 
-double matrix::det(matrix m){ ///////要先寫一個降微的函式，在用遞迴
+double det(matrix m){ ///////要先寫一個降微(去掉底幾行第幾列)的函式，在用遞迴
     double d;
-
-    if (row>1){
-        for (int i=0;i<row;i++){
-            d+=det(low_dimension(m,1,i+1));
+    if(m.row==m.column){
+    if (m.row>1){
+        for (int i=0;i<m.row;i++){
+            d+=*(m.MN+i)*pow(-1,i+2)*det(m.cofactor(1,i+1));
         }
-
     return d;
     }
     else{
         return *(m.MN);
     }
+
+}}
+
+double matrix::two_det(){
+    return (*(MN)* *(MN+3))-(*(MN+1)* *(MN+2));
 
 }
